@@ -1,52 +1,47 @@
-import mysql.connector as mysql
-from flask import render_template
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
 
-db = mysql.connect(host='localhost', port=3306, username='root', password='root')
-crsr = db.cursor()
-crsr.execute("CREATE DATABASE IF NOT EXISTS tixsys")
+db = SQLAlchemy()
+engine = create_engine('mysql://root:root@localhost/tixsys', echo = True)
+cursor = engine.connect()
+class User(db.Model):
+     
+    __tablename__ = 'tixsys_accounts'
+    _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.VARCHAR(255), nullable=False)
+    username = db.Column(db.VARCHAR(255), nullable=False)
+    password = db.Column(db.VARCHAR(255), nullable=False)
+    first_name = db.Column(db.VARCHAR(255), nullable=False)
+    last_name = db.Column(db.VARCHAR(255), nullable=False)
+    verified = db.Column(db.Boolean, nullable=False)
+    archived = db.Column(db.Boolean, nullable=False)
 
-class User:
-        email = ""
-        username = ""
-        password = ""
-        first_name = ""
-        last_name = ""
-        verified = False
-        archived = False
+    def __repr__(self):
+        return '<_id %r>' % self._id
 
-user = User()
+def create_table():
+    db.create_all()
+    db.session.commit()
 
-def initiate_database():
-    db = mysql.connect(host='localhost', port=3306, username='root', password='root', database="tixsys")
-    crsr = db.cursor()
+users = User()
 
-    crsr.execute("""CREATE TABLE IF NOT EXISTS tixsys_accounts VALUES (email VARCHAR(255),
-                 username VARCHAR(255), password VARCHAR(255), first_name VARCHAR(255), last_name VARCHAR(255),
-                 verified BOOLEAN, archived BOOLEAN)""")
-    
-    print("SYSTEM: Database connection sucessful.")
+def login_user(username, password):
+    status = "Login Successful."
 
-def login_user():
-    pass
-    crsr = db.cursor()
-    user = crsr.execute(
-        'SELECT * FROM user WHERE username = ?', (username,)
-    ).fetchone()
+    if status == "Login Successful.":
+        print("SYSTEM: Account found in database.")
+    elif status == "Login Failed.":
+        print("SYSTEM: Account not found in database.")
 
-    if user is None:
-        print("Incorrect username.")
-    elif not password(user['password'], password):
-        print("Incorrect password.")
-    
-    return render_template("login_page.html", page="Login", status=status)
+    return status
+ 
+def register_user(email, username, password, first_name, last_name, verified, archived):
+    user = User(email=email, username=username, password=password, first_name=first_name,
+                           last_name=last_name, verified=verified, archived=archived)
 
-def register_user():        
-    crsr.execute(
-                    """INSERT INTO tixsys_accounts (email, username, password, first_name,
-                    last_name, verified, archived) VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                    (user.email, user.username, user.password, user.first_name, user.last_name,
-                    user.verified, user.archived))
-    print("SYSTEM: Database updated sucessfully.")
+    db.session.add(user)
+    db.session.commit()
 
-    return render_template("register_page.html", page="Register", status=status)
-    
+    print("SYSTEM: Account inserted in database.")
+
+    return f"Registration Successful."
