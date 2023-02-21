@@ -1,9 +1,8 @@
 from flask import Flask
 from routes.blueprint import blueprint
-
 def create_app():
     app = Flask(__name__, template_folder="view/templates")
-    
+
     return app
 
 app = create_app()
