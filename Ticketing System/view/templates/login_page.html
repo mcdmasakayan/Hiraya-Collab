@@ -1,0 +1,9 @@
+{% extends "index.html" %}
+{% block login_content %}
+<form id="login-form" name="login-form" action="#">
+    <input id="username-entry" name="username-entry" type="text" placeholder="Username"/>
+    <input id="password-entry" name="password-entry" type="password" placeholder="Password"/>
+    <button id="submit-button" type="submit" form="login-form">Login</button>
+    <button id="register-button" type="button">Register</button>
+</form>
+{% endblock %}
