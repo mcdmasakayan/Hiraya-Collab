@@ -1,4 +1,5 @@
 import mysql.connector as mysql
+from flask import render_template
 
 db = mysql.connect(host='localhost', port=3306, username='root', password='root')
 crsr = db.cursor()
@@ -12,7 +13,7 @@ class User:
         last_name = ""
         verified = False
         archived = False
-        
+
 user = User()
 
 def initiate_database():
@@ -26,7 +27,18 @@ def initiate_database():
     print("SYSTEM: Database connection sucessful.")
 
 def login_user():
-    #logic here
+    pass
+    crsr = db.cursor()
+    user = crsr.execute(
+        'SELECT * FROM user WHERE username = ?', (username,)
+    ).fetchone()
+
+    if user is None:
+        print("Incorrect username.")
+    elif not password(user['password'], password):
+        print("Incorrect password.")
+    
+    return render_template("login_page.html", page="Login", status=status)
 
 def register_user():        
     crsr.execute(
@@ -34,5 +46,7 @@ def register_user():
                     last_name, verified, archived) VALUES (%s, %s, %s, %s, %s, %s, %s)""",
                     (user.email, user.username, user.password, user.first_name, user.last_name,
                     user.verified, user.archived))
-    print("SYSTEM: Database update sucessful.")
+    print("SYSTEM: Database updated sucessfully.")
+
+    return render_template("register_page.html", page="Register", status=status)
     
