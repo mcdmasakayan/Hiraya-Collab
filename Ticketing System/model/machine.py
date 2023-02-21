@@ -17,25 +17,28 @@ class User(db.Model):
     archived = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
-        return '<_id %r>' % self._id
+        return f"{self}"
 
 def create_table():
     db.create_all()
     db.session.commit()
 
-users = User()
-
 def login_user(username, password):
-    status = "Login Successful."
+    status = "Login Failed."
+    system_msg = "SYSTEM: Account not found in database."
 
-    if status == "Login Successful.":
-        print("SYSTEM: Account found in database.")
-    elif status == "Login Failed.":
-        print("SYSTEM: Account not found in database.")
+    for x in User.query.all():
+        if x.username == username and x.password == password:
+            system_msg = "SYSTEM: Account found in database."
+            status = "Login Successful."
+            break
+            
+    print(system_msg)
 
     return status
  
 def register_user(email, username, password, first_name, last_name, verified, archived):
+    status = "Registration Successful."
     user = User(email=email, username=username, password=password, first_name=first_name,
                            last_name=last_name, verified=verified, archived=archived)
 
@@ -44,4 +47,4 @@ def register_user(email, username, password, first_name, last_name, verified, ar
 
     print("SYSTEM: Account inserted in database.")
 
-    return f"Registration Successful."
+    return status
