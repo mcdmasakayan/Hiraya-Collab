@@ -3,7 +3,7 @@ from view.service import login_logic, register_logic
 from model.machine import login_user, register_user
 
 def index():
-    return "None"
+    return "Base"
 
 def login():
     status = "Start Logging In."
