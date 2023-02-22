@@ -41,6 +41,9 @@ def register_user(email, username, password, first_name, last_name, verified, ar
     user = User(email=email, username=username, password=password, first_name=first_name,
                            last_name=last_name, verified=verified, archived=archived)
 
+    if bool(User.query.all()) == False:
+        create_table()
+
     for x in User.query.all():
         if email == x.email or username == x.username:
             add_user = False
@@ -49,8 +52,8 @@ def register_user(email, username, password, first_name, last_name, verified, ar
             break
         else:
             add_user = True
-    
-    if add_user == True:
+
+    if add_user == True or bool(User.query.all()) == False:
         db.session.add(user)
         db.session.commit()
         print("SYSTEM: Account inserted in database.")
