@@ -10,7 +10,7 @@ def login():
     if request.method == "POST":
         username = request.form['username-entry']
         password = request.form['password-entry']
-        status, logged_in = login_user(username, password)
+        status = login_user(username, password)
 
     return login_logic(status)
 
