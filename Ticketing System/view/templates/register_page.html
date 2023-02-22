@@ -7,7 +7,7 @@
     <input id="fname-entry-r" name="fname-entry-r" type="text" placeholder="First Name"/>
     <input id="lname-entry-r" name="lname-entry-r" type="text" placeholder="Last Name"/>
     <button id="submit-button-r" type="submit" form="register-form">Register</button>
-    <button id="back-button-r" type="button">Back to Login</button>
+    <button id="back-button-r" onclick="window.location.href='http://127.0.0.1:5000/auth/login';" type="button">Back to Login</button>
 </form>
 <h1>{{status}}</h1>
 {% endblock %}

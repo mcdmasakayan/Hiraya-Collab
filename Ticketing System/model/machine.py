@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 
 db = SQLAlchemy()
-engine = create_engine('mysql://root:root@localhost/tixsys', echo = True)
+engine = create_engine('mysql://root:@localhost/tixsys', echo = True)
 cursor = engine.connect()
 class User(db.Model):
      
@@ -19,7 +19,7 @@ class User(db.Model):
     def __repr__(self):
         return f"{self}"
 
-def create_table():
+def create_table(): #not running...
     db.create_all()
     db.session.commit()
 
