@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 
 db = SQLAlchemy()
-engine = create_engine('mysql://root:@localhost/tixsys', echo = True)
+engine = create_engine('mysql://root:root@localhost/tixsys', echo = True)
 cursor = engine.connect()
 class User(db.Model):
      
@@ -19,18 +19,17 @@ class User(db.Model):
     def __repr__(self):
         return f"{self}"
 
-def create_table(): #not running...
+def create_table():
     db.create_all()
     db.session.commit()
 
 def login_user(username, password):
     status = "Login Failed."
     system_msg = "SYSTEM: Account not found in database."
-
     for x in User.query.all():
         if x.username == username and x.password == password:
             system_msg = "SYSTEM: Account found in database."
-            status = "Login Successful."
+            status = f"Login Successful. Welcome {x.first_name} {x.last_name}!"
             break
             
     print(system_msg)
