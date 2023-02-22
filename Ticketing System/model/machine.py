@@ -1,3 +1,4 @@
+import hashlib
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
@@ -29,8 +30,11 @@ class User(db.Model):
 def login_user(username, password):
     status = "Login Failed."
     system_msg = "SYSTEM: Account not found in database."
+
+    pw_hash = hashlib.md5(password.encode()).hexdigest()
+
     for x in User.query.all():
-        if x.username == username and x.password == password:
+        if x.username == username and x.password == pw_hash:
             system_msg = "SYSTEM: Account found in database."
             status = f"Login Successful. Welcome {x.first_name} {x.last_name}!"
             break
@@ -42,8 +46,9 @@ def login_user(username, password):
 def register_user(email, username, password, first_name, last_name, verified, archived):
     status = "Registration Successful."
     add_user = False
-    
-    user = User(email=email, username=username, password=password, first_name=first_name,
+    pw_hash = hashlib.md5(password.encode()).hexdigest()
+
+    user = User(email=email, username=username, password=pw_hash, first_name=first_name,
                            last_name=last_name, verified=verified, archived=archived)
 
     for x in User.query.all():
