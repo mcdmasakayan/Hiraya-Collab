@@ -38,6 +38,8 @@ def login_user(username, password):
  
 def register_user(email, username, password, first_name, last_name, verified, archived):
     status = "Registration Successful."
+    add_user = False
+    
     user = User(email=email, username=username, password=password, first_name=first_name,
                            last_name=last_name, verified=verified, archived=archived)
 
