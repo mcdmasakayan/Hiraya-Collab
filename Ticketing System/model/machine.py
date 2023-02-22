@@ -13,8 +13,8 @@ class User(db.Model):
      
     __tablename__ = 'tixsys_accounts'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.VARCHAR(255), nullable=False)
-    username = db.Column(db.VARCHAR(255), nullable=False)
+    email = db.Column(db.VARCHAR(255), unique=True, nullable=False)
+    username = db.Column(db.VARCHAR(255), unique=True, nullable=False)
     password = db.Column(db.VARCHAR(255), nullable=False)
     first_name = db.Column(db.VARCHAR(255), nullable=False)
     last_name = db.Column(db.VARCHAR(255), nullable=False)
