@@ -7,10 +7,15 @@ def create_app():
     app = Flask(__name__, template_folder="view/templates")
     
     app.config.from_object('config')
-    
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tixsys.db"
+
     with app.test_request_context():
         db.init_app(app)
-    
+        
+    with app.app_context():
+        db.create_all()
+
     return app
 
 app = create_app()

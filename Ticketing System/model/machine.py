@@ -19,10 +19,6 @@ class User(db.Model):
     def __repr__(self):
         return f"{self}"
 
-def create_table():
-    db.create_all()
-    db.session.commit()
-
 def login_user(username, password):
     status = "Login Failed."
     system_msg = "SYSTEM: Account not found in database."
@@ -42,9 +38,6 @@ def register_user(email, username, password, first_name, last_name, verified, ar
     
     user = User(email=email, username=username, password=password, first_name=first_name,
                            last_name=last_name, verified=verified, archived=archived)
-
-    if bool(User.query.all()) == False:
-        create_table()
 
     for x in User.query.all():
         if email == x.email or username == x.username:
