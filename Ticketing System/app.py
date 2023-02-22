@@ -7,7 +7,9 @@ def create_app():
     app = Flask(__name__, template_folder="view/templates")
     
     app.config.from_object('config')
-    db.init_app(app)
+    
+    with app.test_request_context():
+        db.init_app(app)
     
     return app
 
