@@ -1,9 +1,9 @@
 from flask import request
-from view.service import login_logic, register_logic
+from view.service import index_logic, login_logic, register_logic
 from model.machine import login_user, register_user
 
 def index():
-    return "Base"
+    return index_logic()
 
 def login():
     status = "Start Logging In."
