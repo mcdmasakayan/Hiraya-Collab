@@ -7,7 +7,7 @@ engine = create_engine('mysql://root:root@localhost/tixsys', echo = True)
 
 if not database_exists(engine.url):
     create_database(engine.url)
-    
+
 cursor = engine.connect()
 class User(db.Model):
      
@@ -22,7 +22,9 @@ class User(db.Model):
     archived = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
-        return f"{self}"
+        all_data = (f"[{self._id}, {self.email}, {self.username}, {self.password}, " + 
+                    f"{self.first_name}, {self.last_name}, {self.verified}, {self.archived}]")
+        return all_data
 
 def login_user(username, password):
     status = "Login Failed."
@@ -32,7 +34,10 @@ def login_user(username, password):
             system_msg = "SYSTEM: Account found in database."
             status = f"Login Successful. Welcome {x.first_name} {x.last_name}!"
             break
-            
+
+    for x in User.query.all(): #for printing all data
+        print(x)
+
     print(system_msg)
 
     return status

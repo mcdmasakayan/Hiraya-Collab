@@ -8,6 +8,8 @@ def create_app():
     
     app.config.from_object('config')
 
+    app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:root@localhost/tixsys"
+
     with app.test_request_context():
         db.init_app(app)
         
