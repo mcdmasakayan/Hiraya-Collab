@@ -35,9 +35,6 @@ def login_user(username, password):
             status = f"Login Successful. Welcome {x.first_name} {x.last_name}!"
             break
 
-    for x in User.query.all(): #for printing all data
-        print(x)
-
     print(system_msg)
 
     return status
