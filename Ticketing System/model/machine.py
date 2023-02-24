@@ -1,7 +1,8 @@
-import hashlib
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
+from flask import json
+import hashlib
 
 db = SQLAlchemy()
 engine = create_engine('mysql://root:root@localhost/tixsys', echo = True)
@@ -10,8 +11,10 @@ if not database_exists(engine.url):
     create_database(engine.url)
 
 cursor = engine.connect()
-class User(db.Model):
-     
+content = {}
+users = []
+
+class User(db.Model):    
     __tablename__ = 'tixsys_accounts'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.VARCHAR(255), unique=True, nullable=False)
@@ -30,7 +33,6 @@ class User(db.Model):
 def login_user(username, password):
     status = "Login Failed."
     system_msg = "SYSTEM: Account not found in database."
-
     pw_hash = hashlib.md5(password.encode()).hexdigest()
 
     for x in User.query.all():
@@ -38,16 +40,32 @@ def login_user(username, password):
             system_msg = "SYSTEM: Account found in database."
             status = f"Login Successful. Welcome {x.first_name} {x.last_name}!"
             break
+    
+    for result in User.query.all():
+        content = {
+            '_id': result._id,
+            'email': result.email,
+            'username': result.username,
+            'password': result.password,
+            'firstname': result.first_name,
+            'lastname': result.last_name,
+            'verified': result.verified,
+            'archived': result.archived
+        }
+        users.append(content)
+        content = {}
+
+    #print(json.dumps(users)) display the database content in json format
 
     print(system_msg)
-
+    
     return status
  
 def register_user(email, username, password, first_name, last_name, verified, archived):
     status = "Registration Successful."
     add_user = False
     pw_hash = hashlib.md5(password.encode()).hexdigest()
-
+   
     user = User(email=email, username=username, password=pw_hash, first_name=first_name,
                            last_name=last_name, verified=verified, archived=archived)
 

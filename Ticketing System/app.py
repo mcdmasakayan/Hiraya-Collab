@@ -7,8 +7,8 @@ def create_app():
     app = Flask(__name__, template_folder="view/templates")
     
     app.config.from_object('config')
-
     app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:root@localhost/tixsys"
+    app.config['JSON_SORT_KEYS'] = False
 
     with app.test_request_context():
         db.init_app(app)
