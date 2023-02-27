@@ -1,5 +1,5 @@
 from flask import Blueprint
-from controller.control import index, login, register
+from controller.login.control import index, login, register
 
 blueprint = Blueprint('blueprint', __name__)
 

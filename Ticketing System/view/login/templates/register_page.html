@@ -1,0 +1,13 @@
+{% extends "index.html" %}
+{% block register_content %}
+<form id="register-form" name="register-form" action="/tixsys/register" method="post">
+    <input id="email-entry-r" name="email-entry-r" type="text" placeholder="Email"/>
+    <input id="username-entry-r" name="username-entry-r" type="text" placeholder="Username"/>
+    <input id="password-entry-r" name="password-entry-r" type="password" placeholder="Password"/>
+    <input id="fname-entry-r" name="fname-entry-r" type="text" placeholder="First Name"/>
+    <input id="lname-entry-r" name="lname-entry-r" type="text" placeholder="Last Name"/>
+    <button id="submit-button-r" type="submit" form="register-form">Register</button>
+    <button id="back-button-r" onclick="window.location.href='../tixsys/login';" type="button">Back to Login</button>
+</form>
+<h1>{{status}}</h1>
+{% endblock %}
