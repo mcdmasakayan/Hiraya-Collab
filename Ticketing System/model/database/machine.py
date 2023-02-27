@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
+from flask import json
 
 db = SQLAlchemy()
 engine = create_engine('mysql://root:root@localhost/tixsys', echo = True)
@@ -27,3 +28,20 @@ class User(db.Model):
         all_data = (f"[{self._id}, {self.email}, {self.username}, {self.password}, " + 
                     f"{self.first_name}, {self.last_name}, {self.verified}, {self.archived}]")
         return all_data
+    
+    def get_users(self):
+        for x in User.query.all():
+            content = {
+                'id': x._id,
+                'email': x.email,
+                'username': x.username,
+                'password': x.password,
+                'firstname': x.first_name,
+                'lastname': x.last_name,
+                'verified': x.verified,
+                'archived': x.archived
+            }
+            users.append(content)
+            content = {}
+        
+        return json.dumps(users)

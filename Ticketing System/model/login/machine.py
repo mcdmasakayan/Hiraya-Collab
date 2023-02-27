@@ -1,14 +1,18 @@
-from model.database.machine import User, db, users
-from flask import json
+from model.database.machine import User, db
 import hashlib
+
+def hash_string(str):
+    hash_str = hashlib.md5(str.encode()).hexdigest()
+
+    return hash_str
 
 def login_user(username, password):
     status = "Login Failed."
     system_msg = "SYSTEM: Account not found in database."
-    p_hash = hashlib.md5(password.encode()).hexdigest()
+    pw_hash = hash_string(password)
 
     for x in User.query.all():
-        if x.username == username and x.password == p_hash:
+        if x.username == username and x.password == pw_hash:
             system_msg = "SYSTEM: Account found in database."
             status = f"Login Successful. Welcome {x.first_name} {x.last_name}!"
             break
@@ -19,9 +23,9 @@ def login_user(username, password):
 def register_user(email, username, password, first_name, last_name, verified, archived):
     status = "Registration Successful."
     add_user = False
-    p_hash = hashlib.md5(password.encode()).hexdigest()
+    pw_hash = hash_string(password)
    
-    user = User(email=email, username=username, password=p_hash, first_name=first_name,
+    user = User(email=email, username=username, password=pw_hash, first_name=first_name,
                            last_name=last_name, verified=verified, archived=archived)
 
     for x in User.query.all():
@@ -37,22 +41,6 @@ def register_user(email, username, password, first_name, last_name, verified, ar
         db.session.add(user)
         db.session.commit()
         print("SYSTEM: Account inserted in database.")
-        get_users()
+        print(User().get_users())
 
     return status
-
-def get_users():
-    for x in User.query.all():
-        content = {
-            'id': x._id,
-            'email': x.email,
-            'username': x.username,
-            'password': x.password,
-            'firstname': x.first_name,
-            'lastname': x.last_name,
-            'verified': x.verified,
-            'archived': x.archived
-        }
-        users.append(content)
-        content = {}
-    print(json.dumps(users))
