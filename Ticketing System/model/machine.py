@@ -24,7 +24,7 @@ class Project(db.Model):
     __tablename__ = 'projects'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     #organization = db.Column(db.Integer, foreign_key=True)
-    user_id = db.Column(db.Integer, ForeignKey('user._id'))
+    user_id = db.Column(db.Integer, ForeignKey('users._id'))
     name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
