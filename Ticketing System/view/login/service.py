@@ -1,5 +1,11 @@
 from flask import render_template, jsonify
-from model.database.machine import User as users
+from model.machine import db, User as users
+import hashlib
+
+def hash_string(str):
+    hash_str = hashlib.md5(str.encode()).hexdigest()
+
+    return hash_str
 
 def index_logic():
     data = {}
@@ -16,8 +22,33 @@ def index_logic():
         
     return jsonify(data)
 
-def login_logic(status):
-    return render_template("login_page.html", page="Login", status=status)
+def login_logic(username, password):
+    system_msg = "SYSTEM: Account not found in database."
+    pw_hash = hash_string(password)
 
-def register_logic(status):
-    return render_template("register_page.html", page="Register", status=status)
+    for x in users.query.all():
+        if x.username == username and x.password == pw_hash:
+            system_msg = "SYSTEM: Account found in database."
+            break
+
+    print(system_msg)
+
+def register_logic(email, username, password, first_name, last_name, verified, archived):
+    add_user = False
+    pw_hash = hash_string(password)
+   
+    user = users(email=email, username=username, password=pw_hash, first_name=first_name,
+                           last_name=last_name, verified=verified, archived=archived)
+
+    for x in users.query.all():
+        if email == x.email or username == x.username:
+            add_user = False
+            print("SYSTEM: Account already existing in database.")
+            break
+        else:
+            add_user = True
+
+    if add_user == True or bool(users.query.all()) == False:
+        db.session.add(user)
+        db.session.commit()
+        print("SYSTEM: Account inserted in database.")

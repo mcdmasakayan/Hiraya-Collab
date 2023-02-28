@@ -8,9 +8,6 @@ engine = create_engine('mysql://root:root@localhost/tixsys', echo = True)
 if not database_exists(engine.url):
     create_database(engine.url)
 
-cursor = engine.connect()
-data = {}
-
 class User(db.Model):    
     __tablename__ = 'users'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)

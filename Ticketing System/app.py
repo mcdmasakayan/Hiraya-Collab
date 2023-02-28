@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_migrate import Migrate
 from routes.blueprint import blueprint
-from model.login.machine import db
+from model.machine import db
 
 def create_app():
     app = Flask(__name__, template_folder="view/login/templates")
