@@ -23,7 +23,6 @@ class User(db.Model):
 class Project(db.Model):
     __tablename__ = 'projects'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    #organization = db.Column(db.Integer, foreign_key=True)
     user_id = db.Column(db.Integer, ForeignKey('users._id'))
     name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -42,8 +41,8 @@ class Project(db.Model):
 class Task(db.Model):
     __tablename__ = 'tasks'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    #project_id = db.Column(db.Integer, foreign_key=True)
-    #user_id = db.Column(db.Integer, foreign_key=True)
+    project_id = db.Column(db.Integer, ForeignKey('projects._id'))
+    user_id = db.Column(db.Integer, ForeignKey('users._id'))
     name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
@@ -61,8 +60,8 @@ class Task(db.Model):
 class Subtask(db.Model):
     __tablename__ = 'subtasks'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    #task_id = db.Column(db.Integer, foreign_key=True)
-    #user_id = db.Column(db.Integer, foreign_key=True)
+    task_id = db.Column(db.Integer, ForeignKey('tasks._id'))
+    user_id = db.Column(db.Integer, ForeignKey('users._id'))
     name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
