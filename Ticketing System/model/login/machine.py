@@ -41,6 +41,5 @@ def register_user(email, username, password, first_name, last_name, verified, ar
         db.session.add(user)
         db.session.commit()
         print("SYSTEM: Account inserted in database.")
-        print(User().get_users())
 
     return status
