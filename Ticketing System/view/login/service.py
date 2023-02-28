@@ -31,24 +31,25 @@ def login_logic(username, password):
             system_msg = "SYSTEM: Account found in database."
             break
 
-    print(system_msg)
+    return system_msg
 
 def register_logic(email, username, password, first_name, last_name, verified, archived):
     add_user = False
     pw_hash = hash_string(password)
-   
+    system_msg = "SYSTEM: Account already existing in database."
     user = users(email=email, username=username, password=pw_hash, first_name=first_name,
                            last_name=last_name, verified=verified, archived=archived)
 
     for x in users.query.all():
         if email == x.email or username == x.username:
             add_user = False
-            print("SYSTEM: Account already existing in database.")
-            break
+            break 
         else:
             add_user = True
 
     if add_user == True or bool(users.query.all()) == False:
         db.session.add(user)
         db.session.commit()
-        print("SYSTEM: Account inserted in database.")
+        system_msg = "SYSTEM: Account inserted in database."
+        
+    return system_msg
