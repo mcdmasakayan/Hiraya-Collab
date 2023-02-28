@@ -1,55 +1,57 @@
-from flask import render_template, jsonify
+from flask import request, jsonify
 from model.machine import db, User as users
-import hashlib
-
-def hash_string(str):
-    hash_str = hashlib.md5(str.encode()).hexdigest()
-
-    return hash_str
+from view.functions.sys import hash_string, get_users
 
 def index_logic():
-    data = {}
-    for x in users.query.all():
-        data.update({x._id:{
-                    'email': x.email,
-                    'username': x.username,
-                    'password': x.password,
-                    'firstname': x.first_name,
-                    'lastname': x.last_name,
-                    'verified': x.verified,
-                    'archived': x.archived
-                }})
+    return get_users()
+
+def login_logic():
+    try:
+        username = request.args.get('username')
+        password = request.args.get('password')
+        pw_hash = hash_string(password)
+
+        for x in users.query.all():
+            if x.username == username and x.password == pw_hash:
+                auth = 1
+                msg = "SYSTEM: Account found in database."
+                break
+            else:
+                auth = 0
+                msg = "SYSTEM: Account not found in database."
+
+    except (UnboundLocalError, AttributeError):
+        auth = 0
+        msg = "An error has occurred."
+
+    return jsonify({"auth":auth,
+                        "message":msg})
+
+def register_logic():
+    try:
+        email = request.args.get('email')
+        username = request.args.get('username')
+        password = request.args.get('password')
+        first_name = request.args.get('first_name')
+        last_name = request.args.get('last_name')
+        pw_hash = hash_string(password)
+        user = users(email=email, username=username, password=pw_hash, first_name=first_name,
+                            last_name=last_name, verified=False, archived=False)
         
-    return jsonify(data)
+        for x in users.query.all():
+            if (email == x.email or username == x.username) or (bool(users.query.all()) == False):
+                auth = 0
+                msg = "SYSTEM: Account not inserted in database. (Account already existing)"
+                break 
+            else:
+                db.session.add(user)
+                db.session.commit()
+                auth = 1
+                msg = "SYSTEM: Account inserted in database."
 
-def login_logic(username, password):
-    system_msg = "SYSTEM: Account not found in database."
-    pw_hash = hash_string(password)
+    except (UnboundLocalError, AttributeError):
+        auth = 0
+        msg = "An error has occurred."
 
-    for x in users.query.all():
-        if x.username == username and x.password == pw_hash:
-            system_msg = "SYSTEM: Account found in database."
-            break
-
-    return system_msg
-
-def register_logic(email, username, password, first_name, last_name, verified, archived):
-    add_user = False
-    pw_hash = hash_string(password)
-    system_msg = "SYSTEM: Account already existing in database."
-    user = users(email=email, username=username, password=pw_hash, first_name=first_name,
-                           last_name=last_name, verified=verified, archived=archived)
-
-    for x in users.query.all():
-        if email == x.email or username == x.username:
-            add_user = False
-            break 
-        else:
-            add_user = True
-
-    if add_user == True or bool(users.query.all()) == False:
-        db.session.add(user)
-        db.session.commit()
-        system_msg = "SYSTEM: Account inserted in database."
-        
-    return system_msg
+    return jsonify({"auth":auth,
+                    "message":msg})

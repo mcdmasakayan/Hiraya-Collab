@@ -4,7 +4,7 @@ from routes.blueprint import blueprint
 from model.machine import db
 
 def create_app():
-    app = Flask(__name__, template_folder="view/login/templates")
+    app = Flask(__name__)
     
     app.config.from_object('config')
     app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:root@localhost/tixsys"
