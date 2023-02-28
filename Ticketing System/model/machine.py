@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine, ForeignKey
+from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 from datetime import datetime
 
@@ -25,11 +25,11 @@ class User(db.Model):
     last_name = db.Column(db.VARCHAR(255), nullable=False)
     verified = db.Column(db.Boolean, nullable=False)
     archived = db.Column(db.Boolean, nullable=False)
-
+    projects = db.relationship('Project', backref='user') 
 class Project(db.Model):
     __tablename__ = 'projects'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, ForeignKey(ID.user))
+    user_id = db.Column(db.Integer, db.ForeignKey(ID.user))
     name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
@@ -43,15 +43,15 @@ class Project(db.Model):
     for_checking = db.Column(db.Boolean, nullable=False)
     done = db.Column(db.Boolean, nullable=False)
     archived = db.Column(db.Boolean, nullable=False)
-
+    tasks = db.relationship('Task', backref='project') 
 class Task(db.Model):
     __tablename__ = 'tasks'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    project_id = db.Column(db.Integer, ForeignKey(ID.project))
-    user_id = db.Column(db.Integer, ForeignKey(ID.user))
+    project_id = db.Column(db.Integer, db.ForeignKey(ID.project))
+    user_id = db.Column(db.Integer, db.ForeignKey(ID.user))
     name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    priority_level = db.Column(db.Integer)
+    priority_level = db.Column(db.Integer, autoincrement=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     date_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.now)
     date_start = db.Column(db.DateTime, default=datetime.utcnow, nullable=True)
@@ -62,12 +62,12 @@ class Task(db.Model):
     for_checking = db.Column(db.Boolean, nullable=False)
     done = db.Column(db.Boolean, nullable=False)
     archived = db.Column(db.Boolean, nullable=False)
-
+    subtasks = db.relationship('Subtask', backref='task') 
 class Subtask(db.Model):
     __tablename__ = 'subtasks'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    task_id = db.Column(db.Integer, ForeignKey(ID.task))
-    user_id = db.Column(db.Integer, ForeignKey(ID.user))
+    task_id = db.Column(db.Integer, db.ForeignKey(ID.task))
+    user_id = db.Column(db.Integer, db.ForeignKey(ID.user))
     name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
