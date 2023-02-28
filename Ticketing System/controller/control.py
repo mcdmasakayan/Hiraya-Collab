@@ -1,5 +1,5 @@
 from view.login.service import index_logic, login_logic, register_logic
-from view.home.service import pcreate_logic, popen_logic
+from view.home.service import pcreate_logic, popen_logic, logout_logic
 
 #Base
 def index():
@@ -18,3 +18,6 @@ def create_project():
 
 def open_project():
     return popen_logic()
+
+def logout():
+    return logout_logic()

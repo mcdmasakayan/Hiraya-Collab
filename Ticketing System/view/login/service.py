@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, session, jsonify
 from model.machine import db, User as users
 from view.functions.sys import hash_string, get_users
 
@@ -17,13 +17,17 @@ def login_logic():
         else:
             for x in users.query.all():
                 if x.username == username and x.password == pw_hash:
+                    session['active_user'] = x._id
                     auth = 1
                     msg = "SYSTEM: Account found in database."
                     break
+                else:
+                    auth = 0
+                    msg = "SYSTEM: Account not found in database."
 
     except (UnboundLocalError, AttributeError):
         auth = 0
-        msg = "An error has occurred."
+        msg = "SYSTEM: An error has occurred."
 
     return jsonify({"auth":auth,
                     "message":msg})
@@ -50,11 +54,13 @@ def register_logic():
                     auth = 0
                     msg = "SYSTEM: Account not inserted in database. (Account already existing)"
                     break 
+                else:
+                    auth = 1
+                    msg = "SYSTEM: Account inserted in database."
                 
-
     except (UnboundLocalError, AttributeError):
         auth = 0
-        msg = "An error has occurred."
+        msg = "SYSTEM: An error has occurred."
 
     return jsonify({"auth":auth,
                     "message":msg})
