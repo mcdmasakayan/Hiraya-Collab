@@ -37,17 +37,21 @@ def register_logic():
         pw_hash = hash_string(password)
         user = users(email=email, username=username, password=pw_hash, first_name=first_name,
                             last_name=last_name, verified=False, archived=False)
-        
-        for x in users.query.all():
-            if (email == x.email or username == x.username) or (bool(users.query.all()) == False):
-                auth = 0
-                msg = "SYSTEM: Account not inserted in database. (Account already existing)"
-                break 
-            else:
-                db.session.add(user)
-                db.session.commit()
-                auth = 1
-                msg = "SYSTEM: Account inserted in database."
+        auth = 0
+        msg = ""
+
+        if (bool(users.query.all()) == False):
+            db.session.add(user)
+            db.session.commit()
+            auth = 1
+            msg = "SYSTEM: Account inserted in database."
+        else:
+            for x in users.query.all():
+                if (email == x.email or username == x.username):
+                    auth = 0
+                    msg = "SYSTEM: Account not inserted in database. (Account already existing)"
+                    break 
+                
 
     except (UnboundLocalError, AttributeError):
         auth = 0
