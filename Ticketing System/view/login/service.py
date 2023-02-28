@@ -20,9 +20,6 @@ def login_logic():
                     auth = 1
                     msg = "SYSTEM: Account found in database."
                     break
-                else:
-                    auth = 0
-                    msg = "SYSTEM: Account not found in database."
 
     except (UnboundLocalError, AttributeError):
         auth = 0
