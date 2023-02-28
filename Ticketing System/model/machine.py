@@ -3,8 +3,14 @@ from sqlalchemy import create_engine, ForeignKey
 from sqlalchemy_utils import database_exists, create_database
 from datetime import datetime
 
+class ID:
+    user = "users._id"
+    project = "projects._id"
+    task = "tasks._id"
+    subtask = "subtasks._id"
+
 db = SQLAlchemy()
-engine = create_engine('mysql://root:@localhost/tixsys', echo = True)
+engine = create_engine('mysql://root:root@localhost/tixsys', echo = True)
 
 if not database_exists(engine.url):
     create_database(engine.url)
@@ -23,7 +29,7 @@ class User(db.Model):
 class Project(db.Model):
     __tablename__ = 'projects'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, ForeignKey('users._id'))
+    user_id = db.Column(db.Integer, ForeignKey(ID.user))
     name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
@@ -41,8 +47,8 @@ class Project(db.Model):
 class Task(db.Model):
     __tablename__ = 'tasks'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    project_id = db.Column(db.Integer, ForeignKey('projects._id'))
-    user_id = db.Column(db.Integer, ForeignKey('users._id'))
+    project_id = db.Column(db.Integer, ForeignKey(ID.project))
+    user_id = db.Column(db.Integer, ForeignKey(ID.user))
     name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
@@ -60,8 +66,8 @@ class Task(db.Model):
 class Subtask(db.Model):
     __tablename__ = 'subtasks'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    task_id = db.Column(db.Integer, ForeignKey('tasks._id'))
-    user_id = db.Column(db.Integer, ForeignKey('users._id'))
+    task_id = db.Column(db.Integer, ForeignKey(ID.task))
+    user_id = db.Column(db.Integer, ForeignKey(ID.user))
     name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
