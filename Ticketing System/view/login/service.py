@@ -4,6 +4,9 @@ from view.functions.sys import hash_string, get_users
 
 class Client:
     active = 0
+    username = "Guest"
+    first_name = "Guest"
+    last_name = "Guest"
 
 class Message:
     error = "SYSTEM: An error has occurred."
@@ -12,8 +15,11 @@ class Message:
     register_in = "SYSTEM: Account inserted in database."
     register_out = "SYSTEM: Account not inserted in database."
 
-def index_logic():
+def admin_logic():
     return get_users()
+
+def index_logic():
+    return jsonify({'msg':'Hi'})
 
 def login_logic():
     try:
@@ -29,6 +35,9 @@ def login_logic():
             for x in users.query.all():
                 if x.username == username and x.password == pw_hash:
                     session['active_user'] = x._id
+                    Client.first_name = x.first_name
+                    Client.last_name = x.last_name
+                    Client.username = x.username
                     Client.active = session.get('active_user')
                     auth = 1
                     msg = Message.login_in
@@ -42,12 +51,18 @@ def login_logic():
         auth = 0
         msg = Message.error
         Client.active = 0
+        Client.username = "Guest"
+        Client.first_name = "Guest"
+        Client.last_name = "Guest"
 
-    content = [y.name for y in projects.query.filter_by(user_id=Client.active).all()]
+    content = {project.name:project.description for project in projects.query.filter_by(user_id=Client.active).all()}
 
     return jsonify({"auth":auth,
                     "message":msg,
-                    "project_data":content})
+                    "first_name":Client.first_name,
+                    "last_name":Client.last_name,
+                    "user_name":Client.username,
+                    "projects":content})
 
 def register_logic():
     try:
@@ -65,6 +80,7 @@ def register_logic():
             db.session.commit()
             auth = 1
             msg = Message.register_in
+            Client.username = user.username
         else:
             for x in users.query.all():
                 if (email == x.email or username == x.username):
@@ -76,10 +92,13 @@ def register_logic():
                     db.session.commit()
                     auth = 1
                     msg = Message.register_in
+                    Client.username = user.username
                 
     except (UnboundLocalError, AttributeError):
         auth = 0
         msg = Message.error
+        Client.username = ""
 
     return jsonify({"auth":auth,
-                    "message":msg})
+                    "message":msg,
+                    'created_user':Client.username})
