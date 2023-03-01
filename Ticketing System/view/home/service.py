@@ -2,6 +2,7 @@ from flask import request, jsonify
 from model.machine import db
 from model.machine import Project as projects, Task as tasks, Subtask as subtasks
 from view.login.service import Client
+from view.functions.sys import add_entity, open_entity
 from view.functions.msg import Message
 from view.functions.entities import Client, Board, Activity, Todo
 
@@ -28,13 +29,10 @@ def pcreate_logic():
 
             project = projects(name=name, user_id=Client.active, description=description, to_do=True, in_progress=False,
                             for_checking=False, done=False, archived=False)
+            table = projects.query.filter_by(user_id=Client.active).all()
 
-            if (bool(projects.query.filter_by(user_id=Client.active).all()) == False):
-                    db.session.add(project)
-                    db.session.commit()
-                    state = 1
-                    msg = Message.project_exist
-                    Board.name = project.name
+            if (bool(table) == False):
+                    auth, state, msg = add_entity(table, project)
             else:
                 for x in projects.query.filter_by(user_id=Client.active).all():
                     if (name == x.name):
@@ -42,11 +40,8 @@ def pcreate_logic():
                         msg = Message.project_not
                         break 
                     else:
-                        db.session.add(project)
-                        db.session.commit()
-                        state = 1
-                        msg = Message.project_exist
-                        Board.name = project.name
+                        auth, state, msg = add_entity(table, project)
+                        
 
         except (UnboundLocalError, AttributeError):
             state = 0
@@ -70,18 +65,16 @@ def popen_logic():
     if bool(Client.active):
         try:
             name = request.args.get('name')
+            table = projects.query.filter_by(user_id=Client.active).all()
 
-            if(bool(projects.query.filter_by(user_id=Client.active).all()) == False):
+            if(bool(table) == False):
                 state = 0
                 msg = Message.project_out
 
             else:
-                for x in projects.query.filter_by(user_id=Client.active).all():
+                for x in table:
                     if (name == x.name):
-                        state = 1
-                        msg = Message.project_in
-                        Board.active = x._id
-                        Board.name = x.name
+                        auth, state, msg = open_entity(table, x)
                         break
                     else:
                         state = 0
@@ -113,25 +106,18 @@ def tcreate_logic():
 
             task = tasks(name=name, user_id=Client.active, project_id=Board.active, description=description, to_do=True, in_progress=False,
                             for_checking=False, done=False, archived=False)
+            table = tasks.query.filter_by(user_id=Client.active, project_id=Board.active).all()
 
-            if (bool(tasks.query.filter_by(user_id=Client.active, project_id=Board.active).all()) == False):
-                    db.session.add(task)
-                    db.session.commit()
-                    state = 1
-                    msg = Message.task_exist
-                    Activity.name = task.name
+            if (bool(table) == False):
+                    auth, state, msg = add_entity(table, task)
             else:
-                for x in tasks.query.filter_by(user_id=Client.active, project_id=Board.active).all():
+                for x in table:
                     if (name == x.name):
                         state = 0
                         msg = Message.task_not
                         break
                     else:
-                        db.session.add(task)
-                        db.session.commit()
-                        state = 1
-                        msg = Message.task_exist
-                        Activity.name = task.name
+                        auth, state, msg = add_entity(table, task)
 
         except (UnboundLocalError, AttributeError):
             state = 0
@@ -155,18 +141,16 @@ def topen_logic():
     if bool(Board.active):
         try:
             name = request.args.get('name')
+            table = tasks.query.filter_by(user_id=Client.active, project_id=Board.active).all()
 
             if(bool(tasks.query.filter_by(user_id=Client.active, project_id=Board.active).all()) == False):
                 state = 0
                 msg = Message.task_out
 
             else:
-                for x in tasks.query.filter_by(user_id=Client.active, project_id=Board.active).all():
+                for x in table:
                     if (name == x.name):
-                        state = 1
-                        msg = Message.task_in
-                        Activity.active = x._id
-                        Activity.name = x.name
+                        auth, state, msg = open_entity(table, x)
                         break
                     else:
                         state = 0
@@ -201,14 +185,10 @@ def screate_logic():
             subtask = subtasks(name=name, user_id=Client.active,
                                task_id=Activity.active, description=description, to_do=True, 
                                in_progress=False, for_checking=False, done=False, archived=False)
+            table = subtasks.query.filter_by(user_id=Client.active, task_id=Activity.active).all()
 
-            if (bool(subtasks.query.filter_by(user_id=Client.active,
-                                              task_id=Activity.active).all()) == False):
-                    db.session.add(subtask)
-                    db.session.commit()
-                    state = 1
-                    msg = Message.subtask_exist
-                    Todo.name = subtask.name
+            if (bool(table) == False):
+                auth, state, msg = add_entity(table, subtask)    
             else:
                 for x in subtasks.query.filter_by(user_id=Client.active,
                                                   task_id=Activity.active).all():
@@ -217,11 +197,7 @@ def screate_logic():
                         msg = Message.subtask_out
                         break
                     else:
-                        db.session.add(subtask)
-                        db.session.commit()
-                        state = 1
-                        msg = Message.subtask_exist
-                        Todo.name = subtask.name
+                        auth, state, msg = add_entity(table, subtask)
 
         except (UnboundLocalError, AttributeError):
             state = 0
@@ -246,19 +222,16 @@ def sopen_logic():
     if bool(Activity.active):
         try:
             name = request.args.get('name')
-
-            if(bool(subtasks.query.filter_by(user_id=Client.active,
-                                             task_id=Activity.active).all()) == False):
+            table = subtasks.query.filter_by(user_id=Client.active, task_id=Activity.active).all()
+            
+            if(bool(table) == False):
                 state = 0
                 msg = Message.subtask_out
 
             else:
-                for x in subtasks.query.filter_by(user_id=Client.active,
-                                                  task_id=Activity.active).all():
+                for x in table:
                     if (name == x.name):
-                        state = 1
-                        msg = Message.subtask_in
-                        Todo.name = x.name
+                        auth, state, msg = open_entity(table, x)
                         break
                     else:
                         state = 0

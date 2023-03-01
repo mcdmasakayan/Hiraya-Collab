@@ -1,6 +1,7 @@
 from flask import request, session, jsonify
 from model.machine import db, User as users, Project as projects
-from view.functions.sys import hash_string, get_users
+from view.functions.sys import get_users, login_creds, register_creds
+from view.functions.sys import add_entity, open_entity
 from view.functions.msg import Message
 from view.functions.entities import Client
 
@@ -12,24 +13,19 @@ def index_logic():
 
 def login_logic():
     try:
-        username = request.args.get('username')
-        password = request.args.get('password')
-        pw_hash = hash_string(password)
+        username, pw_hash = login_creds()
+        table = users.query.all()
 
-        if (bool(users.query.all()) == False):
+        if (bool(table) == False):
             auth = 0
             msg = Message.login_out
             Client.active = 0
         else:
-            for x in users.query.all():
+            for x in table:
                 if x.username == username and x.password == pw_hash:
                     session['active_user'] = x._id
-                    Client.first_name = x.first_name
-                    Client.last_name = x.last_name
-                    Client.username = x.username
+                    auth, state, msg = open_entity(table, x)
                     Client.active = session.get('active_user')
-                    auth = 1
-                    msg = Message.login_in
                     break
                 else:
                     auth = 0
@@ -55,34 +51,22 @@ def login_logic():
 
 def register_logic():
     try:
-        email = request.args.get('email')
-        username = request.args.get('username')
-        password = request.args.get('password')
-        first_name = request.args.get('first_name')
-        last_name = request.args.get('last_name')
-        pw_hash = hash_string(password)
+        email, username, first_name, last_name, pw_hash = register_creds()
         user = users(email=email, username=username, password=pw_hash, first_name=first_name,
                             last_name=last_name, verified=False, archived=False)
+        table = users.query.all()
 
-        if (bool(users.query.all()) == False):
-            db.session.add(user)
-            db.session.commit()
-            auth = 1
-            msg = Message.register_in
-            Client.username = user.username
+        if (bool(table) == False):
+            auth, state, msg = add_entity(table, user)
         else:
-            for x in users.query.all():
+            for x in table:
                 if (email == x.email or username == x.username):
                     auth = 0
                     msg = Message.register_out
                     break 
                 else:
-                    db.session.add(user)
-                    db.session.commit()
-                    auth = 1
-                    msg = Message.register_in
-                    Client.username = user.username
-                
+                    auth, state, msg = add_entity(table, user)
+
     except (UnboundLocalError, AttributeError):
         auth = 0
         msg = Message.error
