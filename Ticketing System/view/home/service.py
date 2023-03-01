@@ -152,7 +152,7 @@ def tcreate_logic():
                     'subtasks':content})
 
 def topen_logic():
-    if bool(Client.active):
+    if bool(Board.active):
         try:
             name = request.args.get('name')
 
@@ -243,7 +243,7 @@ def screate_logic():
                     'subtasks':content})
 
 def sopen_logic():
-    if bool(Client.active):
+    if bool(Activity.active):
         try:
             name = request.args.get('name')
 
