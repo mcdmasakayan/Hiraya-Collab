@@ -2,36 +2,8 @@ from flask import request, jsonify
 from model.machine import db
 from model.machine import Project as projects, Task as tasks, Subtask as subtasks
 from view.login.service import Client
-
-class Board:
-    active = 0
-    name = ""
-
-class Activity:
-    active = 0
-    name = ""
-
-class Todo:
-    active = 0
-    name = ""
-
-class Message:
-    error = "SYSTEM: An error has occurred."
-    login_not = "SYSTEM: Must login first."
-    logout_in = "SYSTEM: Logout successful."
-    logout_out = "SYSTEM: You are not logged in."
-    project_exist = "SYSTEM: Project inserted in database."
-    project_not = "SYSTEM: Project not inserted in database."
-    project_in = "SYSTEM: Project opened."
-    project_out = "SYSTEM: Project not opened."
-    task_exist = "SYSTEM: Task inserted in database."
-    task_not = "SYSTEM: Task not inserted in database."
-    task_in = "SYSTEM: Task opened."
-    task_out = "SYSTEM: Task not opened."
-    subtask_exist = "SYSTEM: Subtask inserted in database."
-    subtask_not = "SYSTEM Subtask not inserted in database."
-    subtask_in = "SYSTEM: Subtask opened."
-    subtask_out = "SYSTEM: Subtask not opened."
+from view.functions.msg import Message
+from view.functions.entities import Client, Board, Activity, Todo
 
 def logout_logic():
     if bool(Client.active):

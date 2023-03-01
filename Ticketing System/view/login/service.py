@@ -1,19 +1,8 @@
 from flask import request, session, jsonify
 from model.machine import db, User as users, Project as projects
 from view.functions.sys import hash_string, get_users
-
-class Client:
-    active = 0
-    username = "Guest"
-    first_name = "Guest"
-    last_name = "Guest"
-
-class Message:
-    error = "SYSTEM: An error has occurred."
-    login_in = "SYSTEM: Login successful."
-    login_out = "SYSTEM: Login failed."
-    register_in = "SYSTEM: Account inserted in database."
-    register_out = "SYSTEM: Account not inserted in database."
+from view.functions.msg import Message
+from view.functions.entities import Client
 
 def admin_logic():
     return get_users()

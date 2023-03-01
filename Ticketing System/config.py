@@ -2,6 +2,8 @@ import os
 
 SECRET_KEY = 'hirayamnl'
 
+SESSION_PERMANENT = False
+
 SESSION_TYPE = 'filesystem'
 
 basedir = os.path.abspath(os.path.dirname(__file__))
