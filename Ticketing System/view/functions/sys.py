@@ -88,3 +88,30 @@ def open_entity(table, row):
         Todo.name = row.name
 
     return auth, state, msg
+
+def move_task(row, progress):
+    progress = int(progress)
+
+    if progress in range(0,4):
+        row.progress = progress
+        auth = 1
+        state = 1
+        
+        if progress == 0:
+            msg = Message.move_todo
+        
+        elif progress == 1:
+            msg = Message.move_inprogress
+        
+        elif progress == 2:
+            msg = Message.move_forchecking
+
+        elif progress == 3:
+            msg = Message.move_done
+    
+    else:
+        auth = 0
+        state = 0
+        msg = Message.move_not
+    
+    return auth, state, msg

@@ -11,7 +11,9 @@ class Board:
 class Activity:
     active = 0
     name = ""
+    status = ["To Do", "In Progress", "For Checking", "Done"]
 
 class Todo:
     active = 0
     name = ""
+    status = ["To Do", "In Progress", "For Checking", "Done"]

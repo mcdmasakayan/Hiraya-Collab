@@ -2,7 +2,7 @@ from flask import request, jsonify
 from model.machine import db
 from model.machine import Project as projects, Task as tasks, Subtask as subtasks
 from view.login.service import Client
-from view.functions.sys import add_entity, open_entity
+from view.functions.sys import add_entity, open_entity, move_task
 from view.functions.msg import Message
 from view.functions.entities import Client, Board, Activity, Todo
 
@@ -26,9 +26,8 @@ def pcreate_logic():
         try:
             name = request.args.get('name')
             description = request.args.get('description')
-
-            project = projects(name=name, user_id=Client.active, description=description, to_do=True, in_progress=False,
-                            for_checking=False, done=False, archived=False)
+            
+            project = projects(name=name, user_id=Client.active, description=description, progress=0, archived=False)
             table = projects.query.filter_by(user_id=Client.active).all()
 
             if (bool(table) == False):
@@ -66,7 +65,7 @@ def popen_logic():
         try:
             name = request.args.get('name')
             table = projects.query.filter_by(user_id=Client.active).all()
-
+            
             if(bool(table) == False):
                 state = 0
                 msg = Message.project_out
@@ -75,6 +74,7 @@ def popen_logic():
                 for x in table:
                     if (name == x.name):
                         auth, state, msg = open_entity(table, x)
+                        description = x.description
                         break
                     else:
                         state = 0
@@ -90,12 +90,14 @@ def popen_logic():
         Board.active = 0
         Board.name = ""
 
-    content = {task.name:task.description for task in tasks.query.filter_by(user_id=Client.active, project_id=Board.active).all()}
+    content = {task.name:Activity.status[int(task.progress)] for task in tasks.query.filter_by(
+               user_id=Client.active, project_id=Board.active).all()}
 
     return jsonify({'state':state,
                     'message':msg,
                     'username':Client.username,
                     'project_opened':Board.name,
+                    'description':description,
                     'tasks':content})
 
 def tcreate_logic():
@@ -103,9 +105,8 @@ def tcreate_logic():
         try:
             name = request.args.get('name')
             description = request.args.get('description')
-
-            task = tasks(name=name, user_id=Client.active, project_id=Board.active, description=description, to_do=True, in_progress=False,
-                            for_checking=False, done=False, archived=False)
+            
+            task = tasks(name=name, user_id=Client.active, project_id=Board.active, description=description, progress=0, attachments=None,archived=False)
             table = tasks.query.filter_by(user_id=Client.active, project_id=Board.active).all()
 
             if (bool(table) == False):
@@ -151,6 +152,7 @@ def topen_logic():
                 for x in table:
                     if (name == x.name):
                         auth, state, msg = open_entity(table, x)
+                        description = x.description
                         break
                     else:
                         state = 0
@@ -166,15 +168,51 @@ def topen_logic():
         Activity.active = 0
         Activity.name = ""
 
-    content = {subtask.name:subtask.description for subtask in subtasks.query.filter_by(
-                user_id=Client.active, task_id=Activity.active).all()}
+    content = {subtask.name:Todo.status[int(subtask.progress)] for subtask in subtasks.query.filter_by(
+               user_id=Client.active, task_id=Activity.active).all()}
 
     return jsonify({'state':state,
                     'message':msg,
                     'username':Client.username,
                     'opened_project':Board.name,
                     'opened_task':Activity.name,
+                    'description':description,
                     'subtasks':content})
+
+def tmove_logic():
+    if bool(Board.active):
+        try:
+            name = request.args.get('name')
+            progress = request.args.get('progress')
+            table = tasks.query.filter_by(user_id=Client.active, project_id=Board.active).all()
+            for x in table:
+                if (name == x.name):
+                    auth, state, msg = move_task(x, progress)
+                    description = x.description
+                    break
+                else:
+                    state = 0
+                    msg = Message.task_out
+
+        except (UnboundLocalError, AttributeError):
+            state = 0
+            msg = Message.error
+ 
+    else:
+        state = 0
+        msg = Message.project_not
+        Activity.active = 0
+        Activity.name = ""
+
+    content = {task.name:Activity.status[int(task.progress)] for task in tasks.query.filter_by(
+               user_id=Client.active, project_id=Board.active).all()}
+
+    return jsonify({'state':state,
+                    'message':msg,
+                    'username':Client.username,
+                    'project_opened':Board.name,
+                    'description':description,
+                    'tasks':content})
 
 def screate_logic():
     if bool(Activity.active):
@@ -183,8 +221,7 @@ def screate_logic():
             description = request.args.get('description')
 
             subtask = subtasks(name=name, user_id=Client.active,
-                               task_id=Activity.active, description=description, to_do=True, 
-                               in_progress=False, for_checking=False, done=False, archived=False)
+                               task_id=Activity.active, description=description, progress=0, archived=False)
             table = subtasks.query.filter_by(user_id=Client.active, task_id=Activity.active).all()
 
             if (bool(table) == False):
@@ -195,6 +232,7 @@ def screate_logic():
                     if (name == x.name):
                         state = 0
                         msg = Message.subtask_out
+                        desc = x.description
                         break
                     else:
                         auth, state, msg = add_entity(table, subtask)
@@ -207,7 +245,7 @@ def screate_logic():
         msg = Message.task_out
         Todo.name = ""
     
-    content = {subtask.name:subtask.description for subtask in subtasks.query.filter_by(
+    content = {subtask.name:Todo.status[int(subtask.progress)] for subtask in subtasks.query.filter_by(
                user_id=Client.active, task_id=Activity.active).all()}
 
     return jsonify({'state':state,
@@ -216,6 +254,7 @@ def screate_logic():
                     'opened_project':Board.name,
                     'opened_task':Activity.name,
                     'created_subtask':Todo.name,
+                    'description':desc,
                     'subtasks':content})
 
 def sopen_logic():
@@ -232,6 +271,7 @@ def sopen_logic():
                 for x in table:
                     if (name == x.name):
                         auth, state, msg = open_entity(table, x)
+                        description = x.description
                         break
                     else:
                         state = 0
@@ -245,7 +285,7 @@ def sopen_logic():
         state = 0
         msg = Message.task_out
 
-    content = {item.name:item.description for item in subtasks.query.filter_by(
+    content = {item.name:Todo.status[int(item.progress)] for item in subtasks.query.filter_by(
                 user_id=Client.active, task_id=Activity.active).all()}
 
     return jsonify({'state':state,
@@ -254,4 +294,39 @@ def sopen_logic():
                     'opened_project':Board.name,
                     'opened_task':Activity.name,
                     'opened_subtask':Todo.name,
+                    'description':description,
+                    'subtasks':content})
+
+def smove_logic():
+    if bool(Activity.active):
+        try:
+            name = request.args.get('name')
+            progress = request.args.get('progress')
+            table = subtasks.query.filter_by(user_id=Client.active, task_id=Activity.active).all()
+            for x in table:
+                if (name == x.name):
+                    auth, state, msg = move_task(x, progress)
+                    description = x.description
+                    break
+                else:
+                    state = 0
+                    msg = Message.subtask_out
+
+        except (UnboundLocalError, AttributeError):
+            state = 0
+            msg = Message.error
+ 
+    else:
+        state = 0
+        msg = Message.subtask_not
+       
+    content = {subtask.name:Todo.status[int(subtask.progress)] for subtask in subtasks.query.filter_by(
+               user_id=Client.active, task_id=Activity.active).all()}
+
+    return jsonify({'state':state,
+                    'message':msg,
+                    'username':Client.username,
+                    'opened_project':Board.name,
+                    'opened_task':Activity.name,
+                    'description':description,
                     'subtasks':content})
