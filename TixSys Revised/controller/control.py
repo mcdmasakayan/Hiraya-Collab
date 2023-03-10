@@ -1,11 +1,11 @@
 from flask import redirect, url_for
 from model.fetch import get_credentials, get_user_info
 from model.fetch import get_project_info, get_task_info, get_subtask_info
-from model.fetch import get_transfer_info
+from model.fetch import get_transfer_info, get_check_info
 from model.dispatch import send_login_status, send_registration_status
 from model.dispatch import send_logout_status, send_dashboard_data
 from model.dispatch import send_project_content, send_task_content
-from model.dispatch import save_project, save_task, save_subtask
+from model.dispatch import save_project, save_task, save_subtask, check_subtask
 from model.dispatch import transfer_task, remove_task, remove_subtask, remove_project
 from view.user_service import login_page, registration_page
 from view.user_service import dashboard_page, project_page, task_page
@@ -104,6 +104,8 @@ def create_subtask(project_name, task_name):
     return redirect(url_for(Link.task, project_name=project_name, task_name=task_name))
 
 def complete_subtask(project_name, task_name):
+    check_info = get_check_info()
+    check_subtask(project_name, task_name, check_info)
 
     return redirect(url_for(Link.task, project_name=project_name, task_name=task_name))
 

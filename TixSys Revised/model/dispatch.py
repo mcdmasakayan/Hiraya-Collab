@@ -64,14 +64,30 @@ def send_dashboard_data():
     active_user = User.query.filter_by(active=True, archived=False).first()
     user_projects = Project.query.filter_by(user_id=active_user._id, archived=False).all()
     task_today = Task.query.join(Project.tasks).filter(date_today >= Task.date_due).filter_by(archived=False).all()
+    tasks = Task.query.filter_by(archived=False)
+    completions = {}
+
+    for task in tasks:
+        if task.active == True:
+            task.active = False
+            
+    for project in user_projects:
+        if project.active == True:
+            project.active = False
+
+    for project in user_projects:
+        if bool(Task.query.join(Project.tasks)
+           .filter_by(project_id=project._id, archived=False).count()) == False:
+            completions[str(project)] = 100
+        else:
+            completions[str(project)] = (Task.query.join(Project.tasks)
+                         .filter_by(project_id=project._id, progress=Progress.deployment, archived=False).count()/
+                         Task.query.join(Project.tasks).filter_by(project_id=project._id, archived=False).count()) * 100
 
     project_info = {project.name:{'date_created':project.date_created,
                                    'date_due':project.date_due,
                                    'total_tasks':Task.query.filter_by(project_id=project._id, archived=False).count(),
-                                   'completion':f'''{((Task.query.join(Project.tasks)
-                                   .filter_by(progress=Progress.deployment, archived=False).count()/
-                                   Task.query.join(Project.tasks).filter_by(project_id=project._id, archived=False).count()) * 100)
-                                   if not ZeroDivisionError else 100}%'''} for project in user_projects}
+                                   'completion':f'{completions[str(project)]}%'} for project in user_projects}
     task_info = {task.name:{'project_name':task.project.name,
                             'time_remaining':task.date_due, 
                             'assigned_users':''} for task in task_today}
@@ -106,6 +122,10 @@ def send_project_content(project_name):
     user_projects = Project.query.filter_by(user_id=active_user._id, archived=False).all()
     tasks = Task.query.filter_by(project_id=active_project._id, archived=False)
     
+    for task in tasks:
+        if task.active == True:
+            task.active = False
+
     for project in user_projects:
         if project.active == True:
             project.active = False
@@ -118,54 +138,56 @@ def send_project_content(project_name):
     revision_tasks = Task.query.filter_by(project_id=active_project._id, progress=Progress.revisions, archived=False)
     deployment_tasks = Task.query.filter_by(project_id=active_project._id, progress=Progress.deployment, archived=False)
 
-    if tasks.count() != 0:
-        completion = (deployment_tasks.count()/tasks.count()) * 100
-    else:
-        completion = 0
+    tickets = [in_progress_tasks, testing_tasks, revision_tasks, deployment_tasks]
+    completions = {}
 
+    if tasks.count() == 0:
+        completion = 100
+    else:
+        completion = (deployment_tasks.count()/tasks.count()) * 100
+
+    for ticket in tickets:
+        for task in ticket:
+            if bool(Subtask.query.join(Task.subtasks)
+            .filter_by(task_id=task._id, archived=False).count()) == False:
+                completions[str(task)] = 100
+            else:
+                completions[str(task)] = (Subtask.query.join(Task.subtasks)
+                                            .filter_by(task_id=task._id, done=True, archived=False).count()/
+                                            Subtask.query.join(Task.subtasks)
+                                            .filter_by(task_id=task._id, archived=False).count()) * 100
+            
     data = {'project_name':active_project.name,
             'completion':f"{completion}%",
             'in_progress_tasks':{task.name:{'description':task.description,
-                                            'completion':f'''{((Subtask.query.join(Task.subtasks)
-                                                        .filter_by(task_id=task._id, done=True, archived=False).count()/
-                                                        Subtask.query.join(Task.subtasks)
-                                                        .filter_by(task_id=task._id, archived=False).count()) * 100)
-                                                        if not ZeroDivisionError else 0}%''',
+                                            'completion':f'{completions[str(task)]}%',
                                             'date_due':task.date_due,
-                                            'subtasks':{'name':subtask.name
+                                            'subtasks':{subtask.name:{'done':subtask.done,
+                                                                      'description':subtask.description}
                                                         for subtask in Subtask.query.join(Task.subtasks)
                                                         .filter_by(task_id=task._id, archived=False)}}
                                                         for task in in_progress_tasks},
             'testing_tasks':{task.name:{'description':task.description,
-                                        'completion':f'''{((Subtask.query.join(Task.subtasks)
-                                                        .filter_by(task_id=task._id, done=True, archived=False).count()/
-                                                        Subtask.query.join(Task.subtasks)
-                                                        .filter_by(task_id=task._id, archived=False).count()) * 100)
-                                                        if not ZeroDivisionError else 0}%''',
+                                        'completion':f'{completions[str(task)]}%',
                                         'date_due':task.date_due,
-                                        'subtasks':{'name':subtask.name
+                                        'subtasks':{subtask.name:{'done':subtask.done,
+                                                                  'description':subtask.description}
                                                         for subtask in Subtask.query.join(Task.subtasks)
                                                         .filter_by(task_id=task._id, archived=False)}}
                                                         for task in testing_tasks},
             'revision_tasks':{task.name:{'description':task.description,
-                                         'completion':f'''{((Subtask.query.join(Task.subtasks)
-                                                        .filter_by(task_id=task._id, done=True, archived=False).count()/
-                                                        Subtask.query.join(Task.subtasks)
-                                                        .filter_by(task_id=task._id, archived=False).count()) * 100)
-                                                        if not ZeroDivisionError else 0}%''',
+                                         'completion':f'{completions[str(task)]}%',
                                          'date_due':task.date_due,
-                                         'subtasks':{'name':subtask.name
+                                         'subtasks':{subtask.name:{'done':subtask.done,
+                                                                   'description':subtask.description}
                                                         for subtask in Subtask.query.join(Task.subtasks)
                                                         .filter_by(task_id=task._id, archived=False)}}
                                                         for task in revision_tasks},
             'deployment_tasks':{task.name:{'description':task.description,
-                                           'completion':f'''{((Subtask.query.join(Task.subtasks)
-                                                        .filter_by(task_id=task._id, done=True, archived=False).count()/
-                                                        Subtask.query.join(Task.subtasks)
-                                                        .filter_by(task_id=task._id, archived=False).count()) * 100)
-                                                        if not ZeroDivisionError else 0}%''',
+                                           'completion':f'{completions[str(task)]}%',
                                            'date_due':task.date_due,
-                                           'subtasks':{'name':subtask.name
+                                           'subtasks':{subtask.name:{'done':subtask.done,
+                                                                     'description':subtask.description}
                                                         for subtask in Subtask.query.join(Task.subtasks)
                                                         .filter_by(task_id=task._id, archived=False)}}
                                                         for task in deployment_tasks}
@@ -223,9 +245,10 @@ def send_task_content(project_name, task_name):
     active_task.active = True
     db.session.commit()
 
-    subtasks = {'name':subtask.name for subtask in Subtask.query.join(Task.subtasks)
-                .filter_by(task_id=active_task._id, archived=False)}
-    
+    subtasks = {subtask.name:{'done':subtask.done,
+                              'description':subtask.description} for subtask in
+                              Subtask.query.join(Task.subtasks).filter_by(task_id=active_task._id, archived=False)}
+
     data = {active_task.name:{'description':active_task.description,
                          'date_due':active_task.date_due,
                          'participants':'',
@@ -342,5 +365,23 @@ def remove_subtask(project_name, task_name, subtask_name):
             deleted = True
     
     data = {'deleted':deleted}
+
+    return jsonify(data)
+
+def check_subtask(project_name, task_name, check_info):
+    active_user = User.query.filter_by(active=True, archived=False).first()
+    active_project = Project.query.filter_by(user_id=active_user._id, name=project_name, archived=False).first()
+    active_task = Task.query.filter_by(project_id=active_project._id, name=task_name, archived=False).first()
+    selected_subtask = Subtask.query.filter_by(task_id=active_task._id, name=check_info['name'], archived=False).first()
+    subtasks = Subtask.query.filter_by(task_id=active_task._id, archived=False).all()
+    completed = False
+
+    for subtask in subtasks:
+        if selected_subtask.name == subtask.name:
+            selected_subtask.done = bool(check_info['check'])
+            db.session.commit()
+            completed = bool(check_info['name'])
+    
+    data = {'completed':completed}
 
     return jsonify(data)

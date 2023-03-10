@@ -88,3 +88,16 @@ def get_transfer_info():
         return error_response
     
     return transfer_info
+
+def get_check_info():
+    try:
+        name = request.args.get('name')
+        check = request.args.get('check')
+
+        check_info = {'name':name,
+                         'check':check}
+        
+    except (UnboundLocalError, AttributeError):
+        return error_response
+    
+    return check_info

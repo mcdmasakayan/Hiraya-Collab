@@ -34,7 +34,7 @@ class Project(db.Model):
     __tablename__ = 'projects'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey(ID.user))
-    name = db.Column(db.VARCHAR(255), unique=True, nullable=False)
+    name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
@@ -48,7 +48,7 @@ class Task(db.Model):
     __tablename__ = 'tasks'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     project_id = db.Column(db.Integer, db.ForeignKey(ID.project))
-    name = db.Column(db.VARCHAR(255), unique=True, nullable=False)
+    name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
@@ -64,7 +64,7 @@ class Subtask(db.Model):
     __tablename__ = 'subtasks'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     task_id = db.Column(db.Integer, db.ForeignKey(ID.task))
-    name = db.Column(db.VARCHAR(255), unique=True, nullable=False)
+    name = db.Column(db.VARCHAR(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     priority_level = db.Column(db.Integer)
     done = db.Column(db.Boolean, nullable=False)
