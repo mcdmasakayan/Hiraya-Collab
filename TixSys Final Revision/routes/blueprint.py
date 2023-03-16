@@ -12,7 +12,7 @@ bp = Blueprint('bp', __name__)
 bp.route('/admin', methods=['GET'])(show_user_list)
 
 #Login System
-bp.route('/login', methods=['GET'])(login_system)
+bp.route('/login', methods=['POST'])(login_system)
 bp.route('/register', methods=['POST'])(signup_system)
 
 #Dashboard System

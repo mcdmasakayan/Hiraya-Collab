@@ -1,7 +1,7 @@
 from flask import session
     
 def check_session():
-    public_id = 'ff01d9f1-46fe-4df1-a54c-dff62787d4b3'
+    public_id = session.get('public_id')
 
     return public_id
 
