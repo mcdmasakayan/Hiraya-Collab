@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from uuid import uuid4
+from model.variables import Message
 from model.init_db import db
 from model.project.data import Project
 from model.task.data import Task
@@ -26,7 +27,7 @@ def create_subtask(kwarg):
         if 'name' in data:
             for subtask in subtasks:
                 if data['name'] == subtask.name:
-                    return jsonify({'message':'Subtask name already exists. Subtask not created.'})
+                    return jsonify({'message':Message.subtask_exists})
             
             if 'description' in data:
                 description = data['description']
@@ -42,6 +43,6 @@ def create_subtask(kwarg):
             db.session.add(subtask)
             db.session.commit()
 
-            return jsonify({'message':'Subtask created.'})
+            return jsonify({'message':Message.subtask_created})
 
     return jsonify({'message':'Subtask not created.'})

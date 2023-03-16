@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from uuid import uuid4
+from model.variables import Message
 from model.init_db import db
 from model.project.data import Project
 from model.task.data import Task
@@ -10,7 +11,7 @@ def create_project():
     user_id = check_session()
 
     if not user_id:
-        return jsonify({'message':'User not logged in.'})
+        return jsonify({'message':Message.not_logged_in})
     
     projects = Project.query.filter_by(user_id=user_id, archived=False).all()
     data = request.get_json()
@@ -19,7 +20,7 @@ def create_project():
     if 'name' in data:
         for project in projects:
             if data['name'] == project.name:
-                return jsonify({'message':'Project name already exists. Project not created.'})
+                return jsonify({'message':Message.project_exists})
         
         if 'description' in data:
             description = data['description']
@@ -33,9 +34,9 @@ def create_project():
         db.session.add(project)
         db.session.commit()
 
-        return jsonify({'message':'Project created.'})
+        return jsonify({'message':Message.project_created})
 
-    return jsonify({'message':'Project not created.'})
+    return jsonify({'message':Message.project_not_created})
 
 def get_project_data(kwarg):
     user_id = check_session()
@@ -69,5 +70,24 @@ def get_project_data(kwarg):
         
         return jsonify({'project_data':project_data})
     
-    return jsonify({'message':'Project not opened.'})
+    return jsonify({'message':Message.project_not_opened})
     
+def delete_project(kwarg):
+    user_id = check_session()
+
+    if not user_id:
+        return jsonify({'message':Message.not_logged_in})
+    
+    projects = Project.query.filter_by(user_id=user_id, archived=False).all()
+    data = request.get_json()
+
+    if 'project_id' in data:
+        for project in projects:
+            if data['project_id'] == project.public_id:
+                project.archived = True
+                db.session.commit()
+                break
+
+        return jsonify({'message':Message.project_deleted})
+
+    return jsonify({'message':Message.project_not_deleted})

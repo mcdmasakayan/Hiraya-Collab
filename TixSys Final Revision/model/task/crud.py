@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from uuid import uuid4
+from model.variables import Message
 from model.init_db import db
 from model.project.data import Project
 from model.task.data import Task
@@ -10,7 +11,7 @@ def create_task(kwarg):
     user_id = check_session()
 
     if not user_id:
-        return jsonify({'message':'User not logged in.'})
+        return jsonify({'message':Message.not_logged_in})
     
     project = Project.query.filter_by(user_id=user_id, name=kwarg['project_name'], archived=False).first()
 
@@ -25,7 +26,7 @@ def create_task(kwarg):
         if 'name' in data:
             for task in tasks:
                 if data['name'] == task.name:
-                    return jsonify({'message':'Task name already exists. Task not created.'})
+                    return jsonify({'message':Message.task_exists})
             
             if 'description' in data:
                 description = data['description']
@@ -41,15 +42,15 @@ def create_task(kwarg):
             db.session.add(task)
             db.session.commit()
 
-            return jsonify({'message':'Task created.'})
+            return jsonify({'message':Message.task_created})
 
-    return jsonify({'message':'Task not created.'})
+    return jsonify({'message':Message.task_not_created})
 
 def get_task_data(kwarg):
     user_id = check_session()
 
     if not user_id:
-        return jsonify({'message':'User not logged in.'})
+        return jsonify({'message':Message.not_logged_in})
     
     project = Project.query.filter_by(user_id=user_id, name=kwarg['project_name'], archived=False).first()
     task = Task.query.filter_by(project_id=project.public_id, name=kwarg['task_name'], archived=False).first()
@@ -68,4 +69,4 @@ def get_task_data(kwarg):
         
         return jsonify({'task_data':task_data})
     
-    return jsonify({'message':'Task not opened.'})
+    return jsonify({'message':Message.task_not_opened})
