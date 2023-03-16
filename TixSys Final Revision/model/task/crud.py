@@ -19,14 +19,13 @@ def create_task(kwarg):
     
     if 'project_id' in data and project:
         project = Project.query.filter_by(public_id=data['project_id'], user_id=user_id, archived=False).first()
-        tasks = Task.query.filter_by(project_id=project.public_id, archived=False).all()
-        
         description = ''
 
         if 'name' in data:
-            for task in tasks:
-                if data['name'] == task.name:
-                    return jsonify({'message':Message.task_exists})
+            task = Task.query.filter_by(project_id=project.public_id, name=data['name'], archived=False).first()
+
+            if task:
+                return jsonify({'message':Message.task_exists})
             
             if 'description' in data:
                 description = data['description']
@@ -70,3 +69,26 @@ def get_task_data(kwarg):
         return jsonify({'task_data':task_data})
     
     return jsonify({'message':Message.task_not_opened})
+
+def archive_task(kwarg):
+    user_id = check_session()
+
+    if not user_id:
+        return jsonify({'message':Message.not_logged_in})
+    
+    project = Project.query.filter_by(user_id=user_id, name=kwarg['project_name'], archived=False).first()
+    data = request.get_json()
+
+    if 'task_id' in data and project:
+        task = Task.query.filter_by(public_id=data['task_id'], project_id=project.public_id, archived=False).first()
+        subtasks = Subtask.query.filter_by(task_id=task.public_id, archived=False).all()
+        
+        for subtask in subtasks:
+            subtask.archived = True
+
+        task.archived = True
+        db.session.commit()
+
+        return jsonify({'message':Message.project_deleted})
+
+    return jsonify({'message':Message.project_not_deleted})

@@ -18,16 +18,15 @@ def create_subtask(kwarg):
 
     data = request.get_json()
     
-    if 'project_id' in data and project and task:
+    if 'task_id' in data and project and task:
         task = Task.query.filter_by(public_id=data['task_id'], project_id=project.public_id, archived=False).first()
-        subtasks = Subtask.query.filter_by(task_id=task.public_id, archived=False).all()
-        
         description = ''
 
         if 'name' in data:
-            for subtask in subtasks:
-                if data['name'] == subtask.name:
-                    return jsonify({'message':Message.subtask_exists})
+            subtask = Subtask.query.filter_by(task_id=task.public_id, name=data['name'], archived=False).first()
+            
+            if subtask:
+                return jsonify({'message':Message.subtask_exists})
             
             if 'description' in data:
                 description = data['description']
@@ -45,4 +44,7 @@ def create_subtask(kwarg):
 
             return jsonify({'message':Message.subtask_created})
 
-    return jsonify({'message':'Subtask not created.'})
+    return jsonify({'message':Message.subtask_not_created})
+
+def archive_subtask():
+    return None

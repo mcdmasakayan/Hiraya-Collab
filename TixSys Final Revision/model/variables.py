@@ -1,5 +1,6 @@
 class Link:
     admin = '/admin'
+    settings = '/settings'
     login = '/login'
     register = '/register'
     dashboard = '/dashboard'

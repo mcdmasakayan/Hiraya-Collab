@@ -1,4 +1,4 @@
-from model.project.crud import create_project, get_project_data, delete_project
+from model.project.crud import create_project, get_project_data, archive_project
 
 def new_project():
     response = create_project()
@@ -11,5 +11,5 @@ def open_project(**kwargs):
     return response
 
 def remove_project(**kwargs):
-    response = delete_project(kwargs)
+    response = archive_project(kwargs)
     return response

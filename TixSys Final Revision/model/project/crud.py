@@ -13,14 +13,14 @@ def create_project():
     if not user_id:
         return jsonify({'message':Message.not_logged_in})
     
-    projects = Project.query.filter_by(user_id=user_id, archived=False).all()
     data = request.get_json()
     description = ''
 
     if 'name' in data:
-        for project in projects:
-            if data['name'] == project.name:
-                return jsonify({'message':Message.project_exists})
+        project = Project.query.filter_by(user_id=user_id, name=data['name'], archived=False).first()
+
+        if project:
+            return jsonify({'message':Message.project_exists})
         
         if 'description' in data:
             description = data['description']
@@ -47,7 +47,7 @@ def get_project_data(kwarg):
     project = Project.query.filter_by(user_id=user_id, name=kwarg['project_name'], archived=False).first()
     data = request.get_json()
 
-    if ('project_id' in data) and project:
+    if 'project_id' in data and project:
         project = Project.query.filter_by(public_id=data['project_id'], user_id=user_id, archived=False).first()
         tasks = Task.query.filter_by(project_id=project.public_id, archived=False).all()
         subtasks = Subtask.query.filter_by(archived=False)
@@ -72,21 +72,28 @@ def get_project_data(kwarg):
     
     return jsonify({'message':Message.project_not_opened})
     
-def delete_project(kwarg):
+def archive_project(_):
     user_id = check_session()
 
     if not user_id:
         return jsonify({'message':Message.not_logged_in})
     
-    projects = Project.query.filter_by(user_id=user_id, archived=False).all()
     data = request.get_json()
 
     if 'project_id' in data:
-        for project in projects:
-            if data['project_id'] == project.public_id:
-                project.archived = True
-                db.session.commit()
-                break
+        project = Project.query.filter_by(public_id=data['project_id'], user_id=user_id, archived=False).first()
+        tasks = Task.query.filter_by(project_id=project.public_id, archived=False).all()
+        
+        for task in tasks:
+            subtasks = Subtask.query.filter_by(task_id=task.public_id, archived=False).all()
+            
+            for subtask in subtasks:
+                subtask.archived = True
+                
+            task.archived = True
+
+        project.archived = True
+        db.session.commit()
 
         return jsonify({'message':Message.project_deleted})
 
