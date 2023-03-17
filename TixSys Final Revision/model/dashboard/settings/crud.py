@@ -17,7 +17,7 @@ def archive_user():
 
     if 'user_id' in data:
         user = User.query.filter_by(public_id=data['user_id'], archived=False).first()
-        
+
         if user:
             projects = Project.query.filter_by(user_id=user.public_id, archived=False).all()
             
@@ -38,6 +38,6 @@ def archive_user():
             user.archived = True
             db.session.commit()
 
-        return jsonify({'message':Message.project_deleted})
+        return jsonify({'message':Message.user_archived})
 
-    return jsonify({'message':Message.project_not_deleted})
+    return jsonify({'message':Message.user_not_archived})

@@ -1,6 +1,6 @@
 class Link:
     admin = '/admin'
-    settings = '/settings'
+    settings = '/dashboard/settings'
     login = '/login'
     register = '/register'
     dashboard = '/dashboard'
@@ -8,15 +8,16 @@ class Link:
     task = '/dashboard/<string:project_name>/<string:task_name>'
 
 class Message:
-    not_logged_in = 'User not logged in.'
-    
     #User
+    not_logged_in = 'User not logged in.'
     access_granted = 'Access Granted.'
     access_not_granted = 'Access Denied.'
     email_exists = 'Email already exists. User not registered.'
     username_exists = 'Username already exists. User not registered.'
     user_registered = 'User registered.'
     user_not_registered = 'User not registered.'
+    user_archived = 'User archived.'
+    user_not_archived = 'User not archived.'
 
     #Project
     project_exists = 'Project name already exists. Project not created.'
