@@ -20,24 +20,20 @@ def archive_user():
 
         if user:
             projects = Project.query.filter_by(user_id=user.public_id, archived=False).all()
-            
-            for project in projects:
-                tasks = Task.query.filter_by(project_id=project.public_id, archived=False).all()
+            project_ids = [project.public_id for project in projects]
 
-                for task in tasks:
-                    subtasks = Subtask.query.filter_by(task_id=task.public_id, archived=False).all()
+            (Task.query.filter(Task.project_id.in_(project_ids), Task.archived==False)
+                 .update({Task.archived: True}, synchronize_session=False))
 
-                    for subtask in subtasks:
-                        subtask.archived = True
-                        
-                    task.archived = True
+            (Subtask.query.filter(Subtask.task.has(Task.project_id.in_(project_ids)), Subtask.archived==False)
+                    .update({Subtask.archived: True}, synchronize_session=False))
 
-
-                project.archived = True
+            (Project.query.filter(Project.user_id==user.public_id, Project.archived==False)
+                    .update({Project.archived: True}, synchronize_session=False))
 
             user.archived = True
             db.session.commit()
 
-        return jsonify({'message':Message.user_archived})
+            return jsonify({'message':Message.user_archived})
 
     return jsonify({'message':Message.user_not_archived})
