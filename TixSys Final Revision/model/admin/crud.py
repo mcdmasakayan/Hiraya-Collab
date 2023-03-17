@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from model.user.data import User
 
-def get_all_users():
+def show_all_users():
     data = request.get_json()
 
     if 'password' in data and data['password'] == 'admin':

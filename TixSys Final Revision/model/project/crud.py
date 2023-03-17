@@ -38,7 +38,7 @@ def create_project():
 
     return jsonify({'message':Message.project_not_created})
 
-def get_project_data(kwarg):
+def open_project(kwarg):
     user_id = check_session()
 
     if not user_id:
@@ -49,26 +49,28 @@ def get_project_data(kwarg):
 
     if 'project_id' in data and project:
         project = Project.query.filter_by(public_id=data['project_id'], user_id=user_id, archived=False).first()
-        tasks = Task.query.filter_by(project_id=project.public_id, archived=False).all()
-        subtasks = Subtask.query.filter_by(archived=False)
-
-        project_data = {'public_id':project.public_id,
-                        'name':project.name,
-                        'date_created':project.date_created,
-                        'date_updated':project.date_updated,
-                        'tasks':[{'public_id':task.public_id,
-                                'name':task.name,
-                                'description':task.description,
-                                'progress':task.progress,
-                                'date_created':task.date_created,
-                                'date_due':task.date_due,
-                                'subtasks':[{'public_id':subtask.public_id,
-                                             'name':subtask.name,
-                                             'done':subtask.done}
-                                             for subtask in subtasks.filter_by(task_id=task.public_id)]}
-                                             for task in tasks]}
         
-        return jsonify({'project_data':project_data})
+        if project:
+            tasks = Task.query.filter_by(project_id=project.public_id, archived=False).all()
+            subtasks = Subtask.query.filter_by(archived=False)
+
+            project_data = {'public_id':project.public_id,
+                            'name':project.name,
+                            'date_created':project.date_created,
+                            'date_updated':project.date_updated,
+                            'tasks':[{'public_id':task.public_id,
+                                    'name':task.name,
+                                    'description':task.description,
+                                    'progress':task.progress,
+                                    'date_created':task.date_created,
+                                    'date_due':task.date_due,
+                                    'subtasks':[{'public_id':subtask.public_id,
+                                                'name':subtask.name,
+                                                'done':subtask.done}
+                                                for subtask in subtasks.filter_by(task_id=task.public_id)]}
+                                                for task in tasks]}
+            
+            return jsonify({'project_data':project_data})
     
     return jsonify({'message':Message.project_not_opened})
     

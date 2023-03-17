@@ -56,3 +56,6 @@ def register_user():
         return jsonify({'message':Message.user_registered})
     
     return jsonify({'message':Message.user_not_registered})
+
+def logout_user():
+    return jsonify({'message':Message.next_update})

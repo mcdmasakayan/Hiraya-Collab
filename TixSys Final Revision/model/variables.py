@@ -1,13 +1,17 @@
+progress_list = ['In Progress', 'Revisions', 'Testing', 'Deployment']
+
 class Link:
     admin = '/admin'
     settings = '/dashboard/settings'
     login = '/login'
-    register = '/register'
     dashboard = '/dashboard'
     project = '/dashboard/<string:project_name>'
     task = '/dashboard/<string:project_name>/<string:task_name>'
-
+    
 class Message:
+    #System
+    next_update = 'This feature will be in the next update.'
+
     #User
     not_logged_in = 'User not logged in.'
     access_granted = 'Access Granted.'
@@ -36,6 +40,8 @@ class Message:
     task_not_opened = 'Task not opened.'
     task_archived = 'Task archived.'
     task_not_archived = 'Task not archived.'
+    task_moved = 'Task moved.'
+    task_not_moved = 'Task not moved.'
 
     #Subtask
     subtask_exists = 'Subtask name already exists. Subtask not created.'
