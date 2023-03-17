@@ -95,6 +95,6 @@ def archive_project(_):
         project.archived = True
         db.session.commit()
 
-        return jsonify({'message':Message.project_deleted})
+        return jsonify({'message':Message.project_archived})
 
-    return jsonify({'message':Message.project_not_deleted})
+    return jsonify({'message':Message.project_not_archived})

@@ -24,6 +24,8 @@ class Message:
     project_created = 'Project created.'
     project_not_created = 'Project not created.'
     project_not_opened = 'Project not opened.'
+    project_archived = 'Project archived.'
+    project_not_archived = 'Project not archived.'
     project_deleted = 'Project deleted.'
     project_not_deleted = 'Project not deleted.'
 
@@ -32,8 +34,12 @@ class Message:
     task_created = 'Task created.'
     task_not_created = 'Task not created.'
     task_not_opened = 'Task not opened.'
+    task_archived = 'Task archived.'
+    task_not_archived = 'Task not archived.'
 
     #Subtask
     subtask_exists = 'Subtask name already exists. Subtask not created.'
     subtask_created = 'Subtask created.'
     subtask_not_created = 'Subtask not created.'
+    subtask_archived = ' Subtask archived.'
+    subtask_not_archived = 'Subtask archived.'

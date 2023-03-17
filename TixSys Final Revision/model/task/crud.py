@@ -89,6 +89,6 @@ def archive_task(kwarg):
         task.archived = True
         db.session.commit()
 
-        return jsonify({'message':Message.project_deleted})
+        return jsonify({'message':Message.task_archived})
 
-    return jsonify({'message':Message.project_not_deleted})
+    return jsonify({'message':Message.task_not_archived})
